@@ -9,6 +9,7 @@ Last Modified: Dec. 17, 2024
 import sys
 import os, os.path
 from datetime import datetime
+from process_files import csv_process, excel_process
 
 
 # Define MAIN
@@ -55,12 +56,6 @@ def quitProcess(reason='unknown'):
 	printFooter()
 	quit()
 
-
-def bar(width,_symbol='-'):
-	str = _symbol
-	for i in range(width-1):
-		str += _symbol
-	return str
 
 
 def defineKeywords(_labLabels=[]):
@@ -124,78 +119,18 @@ def verifyOverwrite(outputPath):
 	else:
 		# Path does not exists
 		return True
-	
 
-def processFiles(inputPath,outputPath,keywords,labLabels,totals):
-	
-	outputFile = open(outputPath,'w')
-	barWidth = 36
-	sep = ',' # for CSV: Comma Separated Values
-	
-	# Write the date and time of when the extractor was used
-	dt = datetime.now().strftime('%m/%d/%Y %I:%M:%S %p')
-	outputFile.write(bar(barWidth,'='))
-	outputFile.write(f'\nAT Report Extractor Output\nGenerated at {dt}\n')
-	outputFile.write(bar(barWidth,'='))
-
-	# Begin reading input directory
-	for fileName in os.listdir(inputPath):
-		filePath = inputPath + '\\' + fileName
-		inputFile = open(filePath,'r')
-		for line in inputFile:
-			
-			# Record the date of the Advisortrac report
-			found = line.find('from')
-			if (found != -1):
-				dateStr = 'Dates ' + line[found:found+29]
-				dateList = dateStr.split()
-				totals.append(dateList)
-				continue # Nothing else is worthwhile on this line
-			
-			'''
-			These are very specific to our AdvisorTrac Reports and is not 
-			designed to work with all Reports!
-			'''
-
-			newList = list(filter(lambda str: str != '' and str != 'Students\n', line.split('\t')))
-
-			# Criteria to clean up the list
-			if (newList[0] == '<!--Group1 Dif-->'):
-				newList.pop(0)
-			if (newList[0].find('<!--# vis at beginning of report:') != -1):
-				tempList = newList[0].split('>')
-				newList[0] = tempList[1]
-			if newList[0] not in keywords:
-				continue
-			if newList[0] in labLabels:
-				del newList[1:]
-			if (newList[0] == 'Grand Total:'):
-				newList[1] = newList[1].replace('<b>','').replace('</b>','')
-				newList[3] = newList[3].replace('<b>','').replace('</b>','')
-			
-			totals.append(newList)
-		# end of for-loop
-	
-	# Write to file
-	for element in totals:
-		if element[0] in labLabels:
-			outputFile.write('\n\n' + sep.join([element[0],'Visits','Hours','Students']))
-		elif element[0] == 'Grand Total:':
-			outputFile.write('\n\n' + sep.join(['Grand Total','Visits','Hours','Students']))
-			outputFile.write('\n' + sep.join(element))
-		elif element[0] == 'Dates':
-			outputFile.write('\n\n\n' + bar(barWidth))
-			outputFile.write('\n' + ' '.join(element))
-			outputFile.write('\n' + bar(barWidth))
+def processFiles():
+	while (output_file_choice != 'c') and (output_file_choice != 'x'):
+		output_file_choice=input('File output: type c for csv file or x for excel file')
+		if output_file_choice.lower().strip()=='c':
+			csv_process(inputPath,outputPath,keywords,labLabels,totals)
+		elif output_file_choice.lower().strip()=='x':
+			excel_process()
 		else:
-			outputFile.write('\n' + sep.join(element))
-	# end of for-loop
-	
-	print(f'\nProcess completed successfully. Output file is at \"{outputPath}\".')
-	inputFile.close()
-	outputFile.close()
-	return True
-
+			print("\nInvalid choice. Please enter c for 'csv' and x for 'excel'...")
+		
+		
 
 # Invoke MAIN
 main()
