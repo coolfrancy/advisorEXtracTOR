@@ -8,7 +8,6 @@ Last Modified: Dec. 17, 2024
 
 import sys
 import os, os.path
-from datetime import datetime
 from process_files import csv_process, excel_process
 
 
@@ -120,13 +119,14 @@ def verifyOverwrite(outputPath):
 		# Path does not exists
 		return True
 
-def processFiles():
+def processFiles(inputPath,outputPath,keywords,labLabels,totals):
+	output_file_choice=''
 	while (output_file_choice != 'c') and (output_file_choice != 'x'):
-		output_file_choice=input('File output: type c for csv file or x for excel file')
+		output_file_choice=input('File output: type c for csv file or x for excel file: ')
 		if output_file_choice.lower().strip()=='c':
 			csv_process(inputPath,outputPath,keywords,labLabels,totals)
 		elif output_file_choice.lower().strip()=='x':
-			excel_process()
+			excel_process(inputPath,keywords,labLabels,totals)
 		else:
 			print("\nInvalid choice. Please enter c for 'csv' and x for 'excel'...")
 		

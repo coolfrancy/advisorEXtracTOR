@@ -1,22 +1,23 @@
 barWidth = 36
 
 def csv_process(inputPath,outputPath,keywords,labLabels,totals):
+	from datetime import datetime
+	import os
 	
 	outputFile = open(outputPath,'w')
 	sep = ',' # for CSV: Comma Separated Values
 	
 	# Write the date and time of when the extractor was used
 	dt = datetime.now().strftime('%m/%d/%Y %I:%M:%S %p')
-	outputFile.write(bar(barWidth,'='))
+	outputFile.write(barWidth * '=')
 	outputFile.write(f'\nAT Report Extractor Output\nGenerated at {dt}\n')
-	outputFile.write(bar(barWidth,'='))
+	outputFile.write(barWidth *'=')
 
 	# Begin reading input directory
 	for fileName in os.listdir(inputPath):
-		filePath = inputPath + '\\' + fileName
+		filePath = inputPath + '/' + fileName
 		inputFile = open(filePath,'r')
-		for line in inputFile:
-			
+		for line in inputFile:			
 			# Record the date of the Advisortrac report
 			found = line.find('from')
 			if (found != -1):
@@ -45,10 +46,10 @@ def csv_process(inputPath,outputPath,keywords,labLabels,totals):
 			if (newList[0] == 'Grand Total:'):
 				newList[1] = newList[1].replace('<b>','').replace('</b>','')
 				newList[3] = newList[3].replace('<b>','').replace('</b>','')
-			
+
 			totals.append(newList)
 		# end of for-loop
-	
+
 	# Write to file
 	for element in totals:
 		if element[0] in labLabels:
@@ -57,9 +58,9 @@ def csv_process(inputPath,outputPath,keywords,labLabels,totals):
 			outputFile.write('\n\n' + sep.join(['Grand Total','Visits','Hours','Students']))
 			outputFile.write('\n' + sep.join(element))
 		elif element[0] == 'Dates':
-			outputFile.write('\n\n\n' + bar(barWidth))
+			outputFile.write('\n\n\n' + '-' * barWidth)
 			outputFile.write('\n' + ' '.join(element))
-			outputFile.write('\n' + bar(barWidth))
+			outputFile.write('\n' + '-' * barWidth)
 		else:
 			outputFile.write('\n' + sep.join(element))
 	# end of for-loop
@@ -69,8 +70,11 @@ def csv_process(inputPath,outputPath,keywords,labLabels,totals):
 	outputFile.close()
 	return True
 
-def excel_process(inputPath,outputPath,keywords,labLabels,totals):
+def excel_process(inputPath,keywords,labLabels,totals):
+	from datetime import datetime
 	import openpyxl
+	import os
+
 
 	# Create a new workbook
 	wb = openpyxl.Workbook()
@@ -90,7 +94,7 @@ def excel_process(inputPath,outputPath,keywords,labLabels,totals):
 
 	# Begin reading input directory
 	for fileName in os.listdir(inputPath):
-		filePath = inputPath + '\\' + fileName
+		filePath = inputPath + '/' + fileName
 		inputFile = open(filePath,'r')
 		for line in inputFile:
 			
@@ -125,7 +129,7 @@ def excel_process(inputPath,outputPath,keywords,labLabels,totals):
 			
 			totals.append(newList)
 		# end of for-loop
-	
+
 	# Writing information to output file
 	for row, element in enumerate(totals, start=7):
 		if element[0] in labLabels:
@@ -141,15 +145,15 @@ def excel_process(inputPath,outputPath,keywords,labLabels,totals):
 			ws[f'C{row}'] = "Hours"
 			ws[f'D{row}'] = "students"
 
-            # Writes values to cells
-            data_row = row + 1
-            ws.cell(row=data_row, column=1, value=element[0])  # "Grand Total:"
-            if len(element) > 1:
-                ws.cell(row=data_row, column=2, value=element[1])  # Visits value
-            if len(element) > 2:
-                ws.cell(row=data_row, column=3, value=element[2])  # Hours value
-            if len(element) > 3:
-                ws.cell(row=data_row, column=4, value=element[3])  # Students value
+			# Writes values to cells
+			data_row = row + 1
+			ws.cell(row=data_row, column=1, value=element[0])  # "Grand Total:"
+			if len(element) > 1:
+				ws.cell(row=data_row, column=2, value=element[1])  # Visits value
+			if len(element) > 2:
+				ws.cell(row=data_row, column=3, value=element[2])  # Hours value
+			if len(element) > 3:
+				ws.cell(row=data_row, column=4, value=element[3])  # Students value
 				
 		elif element[0] == 'Dates':
 			# Insert dashes into cell
